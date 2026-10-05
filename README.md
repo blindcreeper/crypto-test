@@ -1,5 +1,12 @@
 # Strategy GitHub Pages site
 
+## 在线访问
+
+- [策略介绍首页](https://blindcreeper.github.io/crypto-test/)
+- [实盘监控页面](https://blindcreeper.github.io/crypto-test/crypto-neutral.html)
+
+网页公开可访问。实盘监控页面会显示数据时间；数据更新依赖刷新任务。
+
 This is the public bundle for the strategy introduction, technical notes, and
 read-only live monitor. `site/index.html` opens the introduction; the monitor is
 `site/crypto-neutral.html`.
