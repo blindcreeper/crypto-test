@@ -26,7 +26,7 @@ this directory as its repository root. In **Settings → Pages**, choose
 **GitHub Actions** as the publishing source. The workflow publishes `site/` on
 push and attempts a fresh snapshot every five minutes.
 
-The first push publishes the checked-in snapshot. For scheduled updates, add a
+The first push publishes the checked-in snapshot. For scheduled updates, add
 repository Actions secrets named `SNAPSHOT_SSH_KEY` (a dedicated SSH private
 key) and `SNAPSHOT_SSH_DESTINATION` (the SSH user and host). On the trading
 server, the matching public key must be restricted
@@ -43,3 +43,5 @@ when that request fails, the last candle cache remains visible.
 GitHub Actions schedules can be delayed, so the page shows the source snapshot
 time and treats data older than 25 minutes as stale. The public page is
 informational; live trading continues on the server independently of Pages.
+GitHub can disable scheduled workflows in a public repository after 60 days
+without repository activity; re-enable this workflow in Actions if that occurs.

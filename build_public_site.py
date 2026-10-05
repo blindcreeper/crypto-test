@@ -106,6 +106,16 @@ def copy_static() -> None:
     shutil.copy2(WORKSPACE / "strategy-intro.html", SITE / "index.html")
     (SITE / ".nojekyll").touch()
 
+    # GitHub Pages opens the introduction at index.html.
+    for page in (SITE / "index.html", SITE / "strategy-intro.html", SITE / "strategy-details.html", SITE / "crypto-neutral.html"):
+        html = page.read_text(encoding="utf-8")
+        html = html.replace('class="site-switch-brand" href="crypto-neutral.html"', 'class="site-switch-brand" href="index.html"')
+        html = html.replace('aria-label="返回实盘监控"', 'aria-label="返回策略首页"')
+        html = html.replace('<div class="breadcrumb"><a href="crypto-neutral.html">首页</a> / 策略介绍</div>', '<div class="breadcrumb">策略介绍</div>')
+        html = html.replace('<a href="crypto-neutral.html">⌂ 首页</a>', '<a href="index.html">⌂ 首页</a>')
+        html = html.replace('<nav class="breadcrumbs" aria-label="面包屑导航"><a href="crypto-neutral.html">首页</a>', '<nav class="breadcrumbs" aria-label="面包屑导航"><a href="index.html">首页</a>')
+        page.write_text(html, encoding="utf-8")
+
     # The public website cannot ask visitors to run a Windows sync command.
     for page in (SITE / "crypto-neutral.html",):
         html = page.read_text(encoding="utf-8")
