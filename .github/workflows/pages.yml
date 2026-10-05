@@ -5,7 +5,7 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '3/5 * * * *'
+    - cron: '4,9,14,19,24,29,34,39,44,49,54,59 * * * *'
 
 concurrency:
   group: strategy-pages
