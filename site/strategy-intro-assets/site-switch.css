@@ -1,0 +1,127 @@
+/* Shared product navigation for the live dashboard and strategy article. */
+.site-switch {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 72px;
+  border-bottom: 1px solid var(--pst-color-border, #d1d5da);
+  background: var(--pst-color-card, #fff);
+  color: var(--pst-color-text-base, #333);
+}
+.site-switch-inner {
+  height: 100%;
+  width: 100%;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: clamp(26px, 5vw, 72px);
+}
+.site-switch .site-switch-brand {
+  flex: 0 0 245px;
+  white-space: nowrap;
+  color: var(--pst-color-primary, #11557c);
+  text-decoration: none;
+  font: italic 700 31px/1 Georgia, "Times New Roman", serif;
+  letter-spacing: -1.3px;
+}
+.site-switch-brand span {
+  font: normal 600 15px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  letter-spacing: 0;
+}
+.site-switch .site-switch-tabs {
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.site-switch .site-switch-tabs a {
+  display: flex;
+  align-items: center;
+  padding: 3px 14px 0;
+  border-bottom: 3px solid transparent;
+  color: var(--pst-color-text-muted, #48566b);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.site-switch .site-switch-tabs a:hover,
+.site-switch .site-switch-tabs a:focus-visible {
+  color: var(--pst-color-primary, #11557c);
+  background: var(--pst-color-hover, #edf5f9);
+}
+.site-switch .site-switch-tabs a[aria-current="page"],
+.site-switch .site-switch-tabs a[aria-current="location"] {
+  color: var(--pst-color-primary, #11557c);
+  border-bottom-color: var(--pst-color-primary, #11557c);
+  font-weight: 700;
+}
+.site-switch-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  white-space: nowrap;
+}
+.site-switch .site-switch-details {
+  color: var(--pst-color-text-muted, #48566b);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.site-switch .site-switch-details:hover { color: var(--pst-color-primary, #11557c); }
+.site-switch .site-switch-details[aria-current="page"] { color: var(--pst-color-primary, #11557c); font-weight: 700; }
+.site-switch .theme-toggle { margin-left: 0; }
+.site-switch a:focus-visible,
+.site-switch button:focus-visible { outline: 2px solid var(--pst-color-primary, #11557c); outline-offset: 3px; }
+.doc-side, .doc-toc { top: 72px; height: calc(100vh - 72px); }
+.technical-page .side, .technical-page .toc { top: 72px; height: calc(100vh - 72px); max-height: none; }
+.technical-page .content section { scroll-margin-top: 88px; }
+.technical-page .layout { overflow-x: clip; }
+.technical-page .content { overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+  .site-switch { height: 64px; }
+  .site-switch-inner { padding: 0 16px; gap: 18px; }
+  .site-switch .site-switch-brand { flex-basis: auto; font-size: 25px; }
+  .site-switch-brand span { font-size: 13px; }
+  .site-switch .site-switch-tabs { gap: 2px; }
+  .site-switch .site-switch-tabs a { padding-inline: 10px; font-size: 14px; }
+  .site-switch-actions { gap: 12px; }
+}
+@media (max-width: 575px) {
+  .site-switch-inner { padding: 0 12px; gap: 8px; }
+  .site-switch .site-switch-brand { font-size: 23px; }
+  .site-switch-brand span, .site-switch .site-switch-details { display: none; }
+  .site-switch .site-switch-tabs a { padding-inline: 8px; font-size: 13px; }
+  .site-switch .theme-toggle { width: 34px; height: 34px; flex: 0 0 34px; }
+}
+
+/* One heading-link interaction across the introduction and live monitor. */
+.content a.headerlink,
+.doc-content a.headerlink {
+  margin-left: .35em;
+  color: var(--pst-color-primary, #11557c);
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.content h2:hover > .headerlink,
+.content h3:hover > .headerlink,
+.doc-content h2:hover > .headerlink,
+.content .headerlink:focus-visible,
+.doc-content .headerlink:focus-visible,
+.content .headerlink:hover,
+.doc-content .headerlink:hover {
+  opacity: 1;
+  color: var(--pst-color-secondary, #8045e5);
+}
+@media (hover: none) {
+  .content a.headerlink,
+  .doc-content a.headerlink { opacity: .75; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .content a.headerlink,
+  .doc-content a.headerlink { transition: none; }
+}

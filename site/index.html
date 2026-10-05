@@ -1,0 +1,176 @@
+<!-- Generated from output/量化策略盈利逻辑与我的策略_2026-10-04.html -->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="从预测出发，介绍这套量化策略为什么从单币涨跌转向多币比较，以及如何交易、检验效果和控制风险。">
+  <title>策略介绍 · 从预测到多币组合</title>
+  <script src="strategy-intro-assets/theme-init.js"></script>
+  <link rel="stylesheet" href="strategy-intro-assets/tokens.css">
+  <link rel="stylesheet" href="strategy-intro-assets/layout.css">
+  <link rel="stylesheet" href="strategy-intro-assets/components.css">
+  <link rel="stylesheet" href="strategy-intro-assets/pygments.css">
+  <link rel="stylesheet" href="strategy-intro-assets/site-switch.css">
+</head>
+<body>
+  <div class="site-switch">
+    <div class="site-switch-inner">
+      <a class="site-switch-brand" href="crypto-neutral.html" aria-label="返回实盘监控">strategy<span>／量化研究</span></a>
+      <nav class="site-switch-tabs" aria-label="页面切换">
+        <a href="crypto-neutral.html">实盘监控</a>
+        <a href="#thesis" aria-current="page">策略介绍</a>
+      </nav>
+      <div class="site-switch-actions">
+        <a class="site-switch-details" href="strategy-details.html">技术说明</a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换为深色模式" aria-pressed="false" title="切换深浅主题">◐</button>
+      </div>
+    </div>
+  </div>
+  <nav class="mobile-nav" aria-label="在此页"><strong>在此页</strong><a href="#idea">为什么交易多个币</a><a href="#mechanism">一笔交易</a><a href="#system">如何运行</a><a href="#week33">Week33</a><a href="#listfold">Week47</a><a href="#origin">信号来源</a><a href="#path">形成过程</a><a href="#evidence">历史效果</a><a href="#next">主要风险</a><a href="#sources">资料</a></nav>
+  <div class="layout">
+    <aside class="sidebar" aria-label="章节导航">
+      <h2>章节导航</h2>
+      <a href="#thesis" class="active">策略介绍</a>
+      <a href="#idea">1. 为什么交易多个币</a>
+      <a href="#mechanism">2. 一笔交易怎样赚钱</a>
+      <a href="#system">3. 每次交易怎样做出</a>
+      <a href="#week33" class="sub">Week33 主账户</a>
+      <a href="#listfold" class="sub">Week47 子账户</a>
+      <a href="#origin">4. 为什么可能分出强弱</a>
+      <a href="#path">5. 规则怎样形成</a>
+      <a href="#evidence">6. 目前看到的效果</a>
+      <a href="#next">7. 主要风险与检验</a>
+      <div class="group">相关资料</div>
+      <a href="strategy-details.html">技术说明 ↗</a>
+      <a href="crypto-neutral.html">实时监控 ↗</a>
+      <a href="#sources">引用与报告</a>
+    </aside>
+    <main class="content" id="thesis">
+      <div class="breadcrumb"><a href="crypto-neutral.html">首页</a> / 策略介绍</div>
+      <h1>这套策略怎样通过预测寻找收益？</h1>
+      <p class="lead"><strong>想靠主动交易赚钱，首先要对未来做出有用的预测。</strong>我们尝试从过去的行情中找线索，判断未来 12 小时的价格表现，再据此决定交易什么。预测不必每次都对，但长期带来的收益要足以覆盖判断错误和交易费用。</p>
+      <p class="docmeta">策略介绍 · 2026 年 10 月 5 日</p>
+
+      <section id="idea">
+        <h2>1. 为什么后来不只预测一个币？</h2>
+        <p>我们最初选一个币，利用价格和成交等信息预测它接下来会涨还是跌。这是最直接的交易办法。但币价常常跟着整个市场一起变动，也会受这个币自身的突发消息影响。即使找到一点有用的线索，也容易被这些变化盖过去。测试下来，单币涨跌很难稳定预测，能带来的收益也较小。</p>
+        <p>后来我们换了一个问题：<strong>与其猜一个币会不会涨，不如判断哪些币会比其他币表现更好。</strong>例如，同一段时间 A 跌了 6%，B 跌了 14%。虽然两个币都跌了，A 仍然比 B 强；如果事先做多 A、做空 B，两边合计可能获利，当然还要扣除交易费用。</p>
+        <figure class="logic-figure" aria-labelledby="logic-caption">
+          <div class="logic-grid" role="img" aria-label="研究思路从预测一个币涨跌，转向比较币之间的表现，再把判断分散到多个币上">
+            <div class="logic-lane"><span class="logic-input">最初：只看一个币</span><span class="logic-arrow" aria-hidden="true">↓</span><span class="logic-action">猜它会涨还是跌</span><span class="logic-outcome">市场和突发变化容易盖过预测线索</span></div>
+            <div class="logic-lane logic-signal"><span class="logic-input">后来：比较不同币</span><span class="logic-arrow" aria-hidden="true">↓</span><span class="logic-action">做多较强的，做空较弱的</span><span class="logic-outcome">重点看两边谁表现得更好</span></div>
+            <div class="logic-lane"><span class="logic-input">现在：同时选多个币</span><span class="logic-arrow" aria-hidden="true">↓</span><span class="logic-action">通常做多 6 个、做空 6 个</span><span class="logic-outcome">减少单个币意外涨跌的影响</span></div>
+          </div>
+          <figcaption id="logic-caption"><span class="figure-index">研究思路示意。</span>这些做法只能减少部分干扰，不能保证盈利；图中的步骤也不代表实际收益。</figcaption>
+        </figure>
+        <p>只比较两个币，结果仍可能被其中一个币的意外涨跌左右。所以我们让模型同时比较一组币，通常从中选 6 个做多、6 个做空。<strong>把判断分散到多个币上，是为了让单个币的偶然变化不至于决定整个结果。</strong></p>
+        <p>这种方法只有在模型确实能分辨强弱时才有用。两边的目标金额虽然接近，也不能完全抵消市场影响；最终还要看真实交易的合计收益能否覆盖费用。</p>
+      </section>
+
+      <section id="mechanism">
+        <h2>2. 一笔多空交易怎样赚钱？</h2>
+        <p>“做多”在价格上涨时获利，“做空”在价格下跌时获利。组合看的是两边持仓盈亏的合计，不要求做多的币一定上涨。</p>
+        <p>以主账户为例：假设账户有 100 USDT，按目标仓位拿 45 USDT 做多、45 USDT 做空。12 小时后，如果被做多的币平均跌 2%，多头亏 0.90 USDT；被做空的币平均跌 5%，空头赚 2.25 USDT。<strong>两边合计毛赚 1.35 USDT</strong>，再减去费用，才是账户净收益。</p>
+        <p>反过来，如果被做多的币涨 5%，被做空的币涨 2%，多头赚 2.25 USDT、空头亏 0.90 USDT，合计同样毛赚 1.35 USDT。所以<strong>利润既可能主要来自多头，也可能主要来自空头</strong>。这里比较的是持仓盈亏；“被做空的币涨得更多”则会伤害空头，并非空头获利。</p>
+        <div class="equation">账户净收益 ≈ 多头持仓盈亏 + 空头持仓盈亏 − 净费用<small>净费用包括手续费、滑点、未按预期成交的执行损耗，以及资金费的净支出。<a href="https://www.okx.com/en-us/help/perps-funding-fee-mechanism" target="_blank" rel="noreferrer">资金费可能支付，也可能收取</a>；若收到的资金费超过其他费用，净费用可以为负。两边金额相等只是目标，真实持仓可能暂时不同。</small></div>
+        <p>更常见的差距没有例子中那么大。如果两组币价仅相差 0.10 个百分点，这个 45 USDT 多、45 USDT 空的组合每 100 USDT 权益只产生约 0.045 USDT 毛收益；净费用超过它，仍会亏损。</p>
+        <div class="calc" id="spread-calculator">
+          <h3>自己试一组涨跌幅</h3>
+          <p>数字是未来 12 小时两组币本身的价格变化；结果按每 100 USDT 账户权益计算。净费用填负数表示资金费净收入超过其他费用。</p>
+          <div class="calc-fields">
+            <label for="long-return">被做多币的价格涨跌幅 %<input id="long-return" type="number" step="0.1" value="-2" inputmode="decimal"></label>
+            <label for="short-return">被做空币的价格涨跌幅 %<input id="short-return" type="number" step="0.1" value="-5" inputmode="decimal"></label>
+            <label for="cost-return">净费用 / 每 100 USDT（可为负）<input id="cost-return" type="number" step="any" value="0" inputmode="decimal"></label>
+          </div>
+          <div class="calc-presets" aria-label="示例情境"><button type="button" data-long="-2" data-short="-5">两边都跌，空头赚得多</button><button type="button" data-long="5" data-short="2">两边都涨，多头赚得多</button><button type="button" data-long="-5" data-short="-2">选反了</button><button type="button" data-long="3" data-short="3">涨得一样多</button></div>
+          <output id="calc-result" aria-live="polite"><strong>+1.35 USDT</strong><span>每 100 USDT 权益：多头 −0.90 USDT，空头 +2.25 USDT，扣净费用前。</span></output>
+        </div>
+        <p>如果事前根本无法分辨哪些币未来更强、哪些更弱，那么长期平均的两边价格差接近零；付完费用后，策略反而会亏。这是评价模型时必须跨过的第一道门槛。</p>
+      </section>
+
+      <section id="system">
+        <h2>3. 每次交易是怎样做出的？</h2>
+        <p>策略在一份事先确定的 <strong>60 个 OKX USDT 永续合约</strong>名单中工作。“永续合约”让账户既能做多，也能做空，但也带来资金费和杠杆风险。每次决策只读取已经走完的 4 小时行情，不使用当时还不知道的未来价格。</p>
+        <ol class="sequence">
+          <li><strong>看过去。</strong>把价格趋势、短期反转、波动和成交活跃度等 26 项数据整理成特征。</li>
+          <li><strong>给 60 个币打分。</strong>模型估计未来 12 小时谁可能相对更强、谁可能相对更弱。分数只表示排序，不是“赚钱概率”。</li>
+          <li><strong>形成目标组合。</strong>通常选分数最高的 6 个做多、最低的 6 个做空。原有持仓如果仍在同侧前 18 名，会优先保留，以减少频繁换仓。</li>
+          <li><strong>下单并核对。</strong>使用只挂在订单簿上的 Maker 委托；只有实际成交后才算持仓。未成交、最小下单数量等原因，都可能使真实持仓暂时不是 6 多 6 空。</li>
+        </ol>
+        <p>同一过程写成流程伪代码如下；函数名用于解释，不代表实际下单程序：</p>
+        <pre class="code-example highlight" aria-label="策略流程伪代码"><code><span class="c1"># 只使用决策时已经完成的行情</span>
+<span class="n">bars</span> <span class="o">=</span> <span class="n">completed_bars</span><span class="p">(</span><span class="s2">"4h"</span><span class="p">,</span> <span class="n">universe</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">causal_features</span><span class="p">(</span><span class="n">bars</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">26</span><span class="p">)</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+<span class="n">longs</span><span class="p">,</span> <span class="n">shorts</span> <span class="o">=</span> <span class="n">rank</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">orders</span> <span class="o">=</span> <span class="n">maker_rebalance</span><span class="p">(</span><span class="n">longs</span><span class="p">,</span> <span class="n">shorts</span><span class="p">)</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">confirm_fills</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>  <span class="c1"># 以真实成交为准</span></code></pre>
+        <h3 id="week33">主账户：Week33 版本</h3>
+        <p>用两个 LightGBM 树模型分别寻找未来相对表现可能排在前端和后端的币，再把两个结果合成排序分数。目标是 6 多、6 空，每个仓位的目标规模约为账户权益的 7.5%，合计约 90%；两边各约 45%。这里说的“规模”是按市价计算的仓位金额。</p>
+        <h3 id="listfold">子账户：Week47 ListFold 版本</h3>
+        <p>使用另一种神经网络学习排序，并在原有 4 小时特征之外加入由已完成的 1 小时行情近似构建的成交额柱特征。选币方法同样是 6 多、6 空，但目标总名义金额为账户权益的 4.5 倍，属于<strong>高杠杆版本</strong>。盈利和亏损都可能被放大。下文引用的 Week42 历史研究属于上一版本，不能直接当成当前 Week47 的收益证据。“Week33”“Week47”只是项目内部的版本名。</p>
+        <p>两个账户的模型、资金和真实仓位各自独立。当前实际持仓请看<a href="crypto-neutral.html">实时监控</a>；具体参数和部署过程在<a href="strategy-details.html">技术说明</a>中。</p>
+      </section>
+
+      <section id="origin">
+        <h2>4. 为什么模型可能分得出强弱？</h2>
+        <p>组合能分散噪声，前提仍是特征本身对未来的相对强弱有预测力。模型用历史价格与成交数据给币排序，再检验高分币和低分币之后 12 小时的表现是否真的有差异。</p>
+        <p>可能留下差异的原因有几个：新消息与资金需求可能被市场逐步吸收，让相对强势延续；短时间的大量买卖可能把价格推得过头，随后回落或反弹；不同币的波动和市场敏感度也不一样。模型用历史价格与成交数据寻找这些状态，再看它们是否对应之后 12 小时的不同表现。</p>
+        <p>这些只是<strong>可检验的解释</strong>。目前还不能说这套模型已经找到了哪一种稳定机制。也可能只是它更常做空市场下跌时跌得更快的币，因此在特定行情里显得赚钱。</p>
+      </section>
+
+      <section id="path">
+        <h2>5. 这套规则是怎样形成的？</h2>
+        <ol class="sequence">
+          <li><strong>发现单币方向策略的弱点。</strong>涨跌难以稳定预测，微小优势也容易被手续费吃掉。</li>
+          <li><strong>改为比较同一时刻的币。</strong>用多空组合减弱共同市场波动，并用多个持仓分散单币噪声。早期实验看到一些正的预测信号，但新币、空头表现和交易门槛都存在问题，不能直接上线。</li>
+          <li><strong>把研究收束为能执行的规则。</strong>固定交易名单、只用已经完成的行情、设定 12 小时目标、限制仓位，并在历史数据中模拟交易费用。</li>
+          <li><strong>形成现在的两个版本。</strong>主账户使用双模型排序，子账户使用另一种神经网络。它们都经历了历史比较，但模型曾反复使用同一批历史数据，后续仍需新时段验证。</li>
+        </ol>
+        <p>详细的实验顺序和未通过的筛选条件保留在<a href="strategy-details.html">技术说明</a>与下方<a href="#sources">研究报告</a>里。</p>
+      </section>
+
+      <section id="evidence">
+        <h2>6. 目前看到什么效果？</h2>
+        <p>主账户版本在 1,148 个历史决策时点的模拟中，按预设 Maker 手续费扣费后，平均每 12 小时约赚 <strong>0.0722% 的账户权益</strong>，也就是每 100 USDT 约 0.0722 USDT。模拟尚未完整计入逐币资金费、真实滑点与 Maker 未成交。这是历史平均数，<strong>不是实盘每 12 小时都会赚这么多</strong>，更不能直接推算未来年收益。</p>
+        <figure class="figure"><img src="strategy-intro-assets/pnl-attribution.svg" width="780" height="315" alt="主账户历史模拟每 12 小时多头平均贡献为负，空头贡献为正，扣除模拟 Maker 费用后平均净收益为正"><figcaption><span class="figure-index">图 1.</span> 主账户历史模拟中，多头平均亏 0.56 bp，空头平均赚 8.71 bp，扣除约 0.93 bp 的模拟 Maker 成本后，合计净收益 7.22 bp。1 bp（基点）等于 0.01%。这些是每期账户权益口径的平均值，来源：<a href="afml-study/reports/week33_strategy_research.md">Week33 研究</a>。</figcaption></figure>
+        <p>这张图也提醒我们：历史收益主要来自空头，而且这个组合在所研究的下跌行情里更有利。多空金额相等，不代表它对整个市场涨跌完全不敏感。若市场环境改变，结果可能不同。</p>
+        <p>子账户模型在历史模拟中的平均值也为正，但删除表现最好的 5% 时点后，平均值变为负数。主账户早期模型比较也没有通过全部预先设定的筛选条件。<strong>所以目前的证据支持继续研究，尚不能证明稳定盈利。</strong></p>
+        <details class="research-details"><summary>想看更细的预测与风险指标</summary>
+          <p>主账户模型分数与未来相对收益的原始 <code>Rank IC</code> 为 0.0526；控制市场敏感度、波动、动量和成交额等因素后为 0.0156。<code>Rank IC</code> 衡量的是排序关联，不是账户收益。</p>
+          <figure class="figure"><img src="strategy-intro-assets/rank-ic.svg" width="780" height="300" alt="原始 Rank IC 0.0526，控制市场及风格因素后 0.0156"><figcaption><span class="figure-index">图 2.</span> 控制常见风险因素后，预测关联减弱。来源：<a href="afml-study/reports/week34_residual_ic_audit.md">Week34 归因核查</a>。</figcaption></figure>
+          <p>主账户历史组合的市场敏感度（Beta）估计为 −0.145；按这个估计值把多空权重调到近似中性后，同样历史中的模拟净收益从每期 7.22 bp 降至 4.67 bp。这说明部分历史表现与市场方向和选中币的风险特征有关，不能全部归功于独立的选币能力。</p>
+        </details>
+      </section>
+
+      <section id="next">
+        <h2>7. 看这套策略还要注意什么？</h2>
+        <ul><li><strong>预测会失效：</strong>过去能区分币的规律，可能在新的市场中消失或反转。</li><li><strong>多空不等于没有方向风险：</strong>两边币对市场涨跌的敏感度可能不同，组合仍可能在某些行情中集中亏损。</li><li><strong>模拟成交不等于真实成交：</strong>资金费、滑点和 Maker 挂单未成交都可能吃掉收益。</li><li><strong>子账户杠杆更高：</strong>价格小幅变化就可能造成明显的权益波动，需要单独看待。</li></ul>
+        <p>下一步最有说服力的检验，是在没有参与模型选择的新时段，持续核对交易所的真实成交、两边各自盈亏、全部费用与市场风险。如果真实的两腿合计收益不能长期覆盖这些成本，这个策略就没有可持续的净优势。</p>
+        <aside class="note" role="note"><strong class="admonition-title">一句话总结</strong><p>我们从难以稳定预测的单币涨跌，转向预测多个币的相对强弱；用多空配置减弱市场干扰，用分散持仓降低单币噪声。历史模拟出现过正收益，但收益来源和未来稳定性仍待验证。</p></aside>
+      </section>
+
+      <section id="sources" class="sources">
+        <h2>延伸阅读与研究资料</h2>
+        <ul><li><a href="strategy-details.html">本项目技术说明</a>；<a href="afml-study/reports/week33_strategy_research.md">主账户研究</a>；<a href="afml-study/reports/week42_strategy_research.md">子账户研究</a>；<a href="afml-study/reports/week34_residual_ic_audit.md">风险归因核查</a>。</li><li>Markowitz，<a href="https://doi.org/10.1111/j.1540-6261.1952.tb01525.x" target="_blank" rel="noreferrer">Portfolio Selection</a>：组合分散与资产相关性；Grinold，<a href="https://doi.org/10.3905/jpm.1989.409211" target="_blank" rel="noreferrer">The Fundamental Law of Active Management</a>：预测能力与相对独立的投资机会。</li><li>Liu、Tsyvinski、Wu，<a href="https://www.nber.org/papers/w25882" target="_blank" rel="noreferrer">Common Risk Factors in Cryptocurrency</a>：加密资产横截面与多空组合；Gu、Kelly、Xiu，<a href="https://www.nber.org/papers/w25398" target="_blank" rel="noreferrer">Empirical Asset Pricing via Machine Learning</a>；<a href="https://doi.org/10.1016/j.irfa.2024.103244" target="_blank" rel="noreferrer">Cakici 等的加密资产研究</a>。这些研究提供方法与线索，不能直接证明本策略的未来收益。</li></ul>
+      </section>
+      <footer>本文是策略介绍。历史模拟不是实时账户收益，也不保证未来结果；实际持仓与权益以监控页和交易所记录为准。</footer>
+    </main>
+    <aside class="page-toc" aria-label="在此页">
+      <h2>在此页</h2>
+      <a href="#idea">为什么交易多个币</a>
+      <a href="#mechanism">一笔交易怎样赚钱</a>
+      <a href="#system">每次交易怎样做出</a>
+      <a class="sub" href="#week33">Week33 主账户</a>
+      <a class="sub" href="#listfold">Week47 子账户</a>
+      <a href="#origin">为什么可能分出强弱</a>
+      <a href="#path">规则怎样形成</a>
+      <a href="#evidence">目前看到的效果</a>
+      <a href="#next">主要风险与检验</a>
+      <a href="#sources">延伸阅读与研究资料</a>
+    </aside>
+  </div>
+  <script src="strategy-intro-assets/interactions.js"></script>
+</body>
+</html>

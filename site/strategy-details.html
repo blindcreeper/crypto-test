@@ -1,0 +1,213 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>策略介绍 · Week33 与 ListFold</title>
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:#202428;background:#fff;font:16px/1.67 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+.top{height:64px;position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e9ecef;display:flex;align-items:center;gap:40px;padding:0 40px}.brand{font-size:22px;font-weight:800;color:#185484;letter-spacing:-.04em;white-space:nowrap}.brand span{color:#5ca6d5;font-weight:600;font-size:16px}.tabs{height:100%;display:flex;align-items:center;gap:22px}.tabs a{height:100%;display:flex;align-items:center;color:#444e58;text-decoration:none;font-size:15px;border-bottom:2px solid transparent}.tabs a.active{color:#185484;font-weight:700;border-bottom-color:#185484}.tabs a:hover{color:#185484}
+.layout{max-width:1512px;margin:auto;padding:31px 30px 86px;display:grid;grid-template-columns:minmax(205px,260px) minmax(0,750px) minmax(155px,205px);gap:44px;justify-content:space-between;align-items:start}.side,.toc{position:sticky;top:94px;display:flex;flex-direction:column;gap:7px;font-size:13px;max-height:calc(100vh - 110px);overflow:auto}.side h2,.toc h2{font-size:14px;margin:0 0 11px;color:#30363c}.side a,.toc a{color:#475360;text-decoration:none;line-height:1.45;padding:3px 0}.side a:hover,.toc a:hover{color:#185484;text-decoration:underline}.toc{border-left:1px solid #e5e8eb;padding-left:18px;font-size:12px}.toc a{color:#586675}
+.content{min-width:0;max-width:750px}.breadcrumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:#6a747e;margin:0 0 21px}.breadcrumbs a{color:#276399;text-decoration:none}.breadcrumbs a:hover{text-decoration:underline}.doc-note{font-size:13px;color:#46525e;margin:0 0 15px}.doc-note a{color:#2869a1;text-decoration:none}.doc-note a:hover{text-decoration:underline}.content section{scroll-margin-top:91px;margin-bottom:45px}.content section+section{padding-top:3px}.content h1{font-size:38px;line-height:1.27;letter-spacing:-.025em;margin:0 0 24px;color:#15191d}.content h2{font-size:28px;line-height:1.35;letter-spacing:-.015em;margin:0 0 17px;color:#181d22}.content h3{font-size:21px;line-height:1.35;margin:32px 0 12px;color:#202428}.content p{margin:13px 0}.content blockquote{border-left:3px solid #d6e2ed;padding:1px 0 1px 16px;margin:20px 0 28px;background:none;color:#46525e}.content a{color:#2869a1}.content code{font-family:Consolas,Monaco,monospace;font-size:.87em;background:#f5f6f7;padding:1px 3px;border-radius:2px}.content pre{padding:8px 0 8px 23px;margin:19px 0 27px;background:#fff;border:0;overflow:auto;line-height:1.55;color:#28394a;font-size:14px}.content pre code{background:none;padding:0}.content table{border-collapse:collapse;display:block;overflow:auto;width:max-content;max-width:100%;font-size:13px;margin:19px 0 27px}.content th,.content td{border-bottom:1px solid #e3e7eb;padding:8px 11px;white-space:nowrap}.content th{border-top:1px solid #e3e7eb;background:#f8f9fa;text-align:left}.content li{margin:6px 0}
+.research-figure{margin:22px 0}.research-figure img{display:block;width:100%;height:auto}.research-figure figcaption{color:#66717d;font-size:12px;line-height:1.6;margin-top:7px}
+@media(max-width:1200px){.layout{grid-template-columns:190px minmax(0,750px);justify-content:center;gap:32px}.toc{display:none}}@media(max-width:900px){.layout{display:block;padding:26px 24px 70px}.side{display:none}.content{max-width:750px;margin:auto}.top{padding:0 24px}}@media(max-width:650px){.top{height:56px;padding:0 14px;gap:18px}.brand{font-size:17px}.brand span{font-size:11px}.tabs{gap:13px}.tabs a{font-size:12px}.layout{padding:23px 16px 60px}.content h1{font-size:29px}.content h2{font-size:23px}.content h3{font-size:19px}.breadcrumbs{font-size:12px}.doc-note{font-size:12px}}
+/* Match the live monitor's shared navigation shell. */
+.top{height:100px;position:relative;top:auto;border-top:2px solid #e5e2df;box-shadow:0 2px 4px #2228320d;padding:0 max(4.5vw,30px);gap:0}.brand{min-width:370px;font-size:31px;font-style:italic;font-weight:800;color:#11557c}.brand span{font-size:17px;font-style:normal;color:#11557c;letter-spacing:0}.tabs{gap:10px}.tabs a{font-size:17px;color:#48566b;padding:9px 3px;border-bottom:3px solid transparent}.tabs a.active{color:#0a7d91;border-bottom-color:#0a7d91}.top-caption{margin-left:auto;border:1px solid #d1d5da;border-radius:4px;padding:9px 12px;color:#48566b;font-size:13px;white-space:nowrap}
+.layout{max-width:none;margin:0;padding:0;grid-template-columns:minmax(220px,22%) minmax(0,1fr) minmax(220px,20%);gap:0;justify-content:stretch;align-items:stretch}.side{top:0;height:calc(100vh - 100px);max-height:none;border-right:1px solid #e1e4e8;padding:46px 24px 45px max(4.5vw,24px);font-size:15px;gap:0}.side h2{font-size:20px;margin-bottom:18px}.side a{padding:9px 12px}.side a.active{border-left:3px solid #0a7d91;color:#0a7d91;font-weight:700;background:#f4fafb}.toc{top:0;height:calc(100vh - 100px);max-height:none;border-left:1px solid #d1d5da;background:#f5f6f7;padding:34px 24px;font-size:14px;gap:0}.toc h2{color:#8045e5;font-size:16px}.toc a{padding:7px 0}.content{max-width:1160px;width:100%;padding:28px min(3.1vw,62px) 80px;margin:0 auto}.breadcrumbs{margin-bottom:28px;color:#48566b}.content section{scroll-margin-top:24px}
+@media(max-width:1450px){.top{padding:0 24px}.brand{min-width:260px}.side{padding-left:24px}.content{padding:28px 32px 70px}}
+@media(max-width:1200px){.layout{grid-template-columns:200px minmax(0,1fr);gap:0}.toc{display:none}.brand{min-width:230px}.top{padding:0 24px}}
+@media(max-width:850px){.layout{display:block;padding:0}.side{display:none}.content{max-width:none;padding:24px 20px 55px}.top{height:70px}.brand{min-width:0;margin-right:25px;font-size:24px}.tabs a{font-size:14px}.top-caption{display:none}}
+@media(max-width:650px){.top{height:60px;padding:0 12px}.brand{font-size:19px;margin-right:12px}.brand span{display:none}.tabs{gap:8px}.tabs a{font-size:12px;padding:8px 2px}.content{padding:20px 12px 40px}.content h1{font-size:27px}.content h2{font-size:23px}.content h3{font-size:19px}.breadcrumbs{font-size:12px}}
+</style><link rel="stylesheet" href="strategy-intro-assets/site-switch.css"></head><body class="technical-page"><div class="site-switch"><div class="site-switch-inner"><a class="site-switch-brand" href="crypto-neutral.html" aria-label="返回实盘监控">strategy<span>／量化研究</span></a><nav class="site-switch-tabs" aria-label="页面切换"><a href="crypto-neutral.html">实盘监控</a><a href="strategy-intro.html" aria-current="location">策略介绍</a></nav><div class="site-switch-actions"><a class="site-switch-details" href="strategy-details.html" aria-current="page">技术说明</a></div></div></div><main class="layout"><aside class="side" aria-label="账户导航"><h2>账户导航</h2><a class="active" href="#week33">主账户 · Week33</a><a href="#listfold">子账户 · ListFold</a></aside><article class="content"><nav class="breadcrumbs" aria-label="面包屑导航"><a href="crypto-neutral.html">首页</a><span>›</span><span>策略介绍</span><span>›</span><span>主账户与子账户</span></nav><div class="doc-note">研究资料：<a href="afml-study/notebooks/12_week33_live_strategy_research.ipynb" download>Week33 Jupyter 笔记</a> · <a href="afml-study/reports/week33_strategy_research.md" download>Week33 报告</a> · <a href="afml-study/reports/week42_strategy_research.md" download>ListFold 说明</a></div><section id="week33"><h1>主账户 · Week33 双分类策略</h1>
+<blockquote>
+<p>研究整理日期：2026-10-01；实盘规则更新至 2026-10-03。对应主账户版本 <code>WEEK33_OKX_4H_DUAL_CLASSIFIER_NEUTRAL_V1</code>。<br />
+这是策略机制、已有研究与部署事实的整理；历史模拟和短期实盘都不能保证未来收益。实时权益与持仓以 <strong>实盘监控</strong> 页为准。</p>
+</blockquote>
+</section><section id="section-1"><h2>1. 核心问题与策略思路</h2>
+<p>原先的单侧方向策略依赖市场方向判断。当前策略转为<strong>同一时点在冻结的 60 个 OKX USDT 永续合约中做横截面排序</strong>：挑相对强的 6 个做多、相对弱的 6 个做空，用两侧接近相等的名义金额降低净美元敞口。这里的“市场中性”指<strong>美元名义大体平衡</strong>；它不等于市场 Beta、行业或风格暴露严格为零。</p>
+<pre><code class="language-text">已完成的 4 小时 K 线 → 26 个因果特征 → 两个 LightGBM 分类器
+        → 前 10% 概率 − 后 10% 概率 → 60 币排序
+        → 多头 6 币 / 空头 6 币（各自前 18 名持仓缓冲）
+        → 限额检查与 Maker 委托 → 真实成交确认 → 5 分钟风险检查
+</code></pre>
+<h3>为什么用两个分类器</h3>
+<p>研究标签先计算未来 <strong>3 根 4 小时 K 线（12 小时）</strong> 的对数收益，减去同一时点可交易币的横截面均值，并在每个截面按 1%/99% 分位截尾。训练时把该标签按日期排名：前 10% 是上尾分类器的正例，后 10% 是下尾分类器的正例。实盘分数定义为：</p>
+<p><code>score = P(未来相对收益进入前 10%) − P(未来相对收益进入后 10%)</code></p>
+<p>分数用于<strong>排序</strong>，不是单币未来收益率，也不是可以直接解释为盈利概率的数值。特征包括动量、反转、波动、价格区间、成交额冲击、流动性近似及相对市场的走势，共 26 个。每个时点的特征在 60 币内转为百分位排名，然后送入两个已冻结的模型。</p>
+</section><section id="section-2"><h2>2. 数据、训练与防前视</h2>
+<table>
+<thead>
+<tr>
+  <th>项目</th>
+  <th>冻结配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>交易池</td>
+  <td>60 个 OKX USDT 永续合约，研究时冻结名单</td>
+</tr>
+<tr>
+  <td>输入频率</td>
+  <td>已完成的 4 小时 K 线</td>
+</tr>
+<tr>
+  <td>预测目标</td>
+  <td>未来 3 根 4 小时 K 线的横截面相对收益尾部</td>
+</tr>
+<tr>
+  <td>特征</td>
+  <td>26 个，在每个时间截面内做百分位排名</td>
+</tr>
+<tr>
+  <td>训练样本</td>
+  <td>87,827 行、1,498 个训练时点</td>
+</tr>
+<tr>
+  <td>训练起点 / 标签截止</td>
+  <td>2024-09-06 08:00 UTC / 2026-09-25 04:00 UTC</td>
+</tr>
+<tr>
+  <td>模型</td>
+  <td>两个 LightGBM 二分类器，各 300 棵树、15 叶、学习率 0.05；正类权重 9</td>
+</tr>
+<tr>
+  <td>冻结校验</td>
+  <td>数据源和两个模型文件分别保存 SHA-256，实盘启动时核验模型</td>
+</tr>
+</tbody>
+</table>
+<p>研究中的四折扩展样本外检验在每折训练与测试之间留了 12 小时隔离，并按实盘的 UTC 00:00 / 12:00 信号时钟评价。这样处理了标签跨越训练/测试边界的问题，但不能消除冻结币池的幸存者偏差、反复研究选择带来的偏差，以及真实 Maker 成交偏差。</p>
+</section><section id="section-3"><h2>3. 样本外研究给出了什么证据</h2>
+<p>Week32 在 <strong>2025-03-01 至 2026-09-25</strong> 的 1,148 个 12 小时时点比较信号。市场中性结构下，研究版组合的名义多空各占 50%，合计 100%；按 Maker 每边 2 bp、Taker 每边 5 bp 扣除模拟交易成本：</p>
+<table>
+<thead>
+<tr>
+  <th>市场中性信号</th>
+  <th style="text-align:right">Maker 净收益 / 12h</th>
+  <th style="text-align:right">HAC t</th>
+  <th style="text-align:right">Taker 净收益 / 12h</th>
+  <th style="text-align:right">平均换手</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>基线回归信号</td>
+  <td style="text-align:right">+3.68 bp</td>
+  <td style="text-align:right">+1.16</td>
+  <td style="text-align:right">+1.69 bp</td>
+  <td style="text-align:right">0.666</td>
+</tr>
+<tr>
+  <td>双分类信号</td>
+  <td style="text-align:right">+8.02 bp</td>
+  <td style="text-align:right">+2.77</td>
+  <td style="text-align:right">+6.46 bp</td>
+  <td style="text-align:right">0.519</td>
+</tr>
+</tbody>
+</table>
+<p>双分类相对基线提高 <strong>+4.33 bp/12h</strong>，但增量 HAC t 仅 <strong>+1.31</strong>，四折中 <strong>3/4</strong> 为正；剔除最佳 5% 周期后，双分类策略的平均净收益为 <strong>−2.78 bp/12h</strong>。Week32 报告据其预设门槛给出的判定是“候选信号未同时满足全部晋级条件”。因此，这组结果支持继续研究，<strong>不能写成已经完成独立统计验证</strong>。后来它进入实盘部署，是部署事实；现有材料没有提供一个新的独立样本来推翻当时的限制。</p>
+<p>Week33 对实际使用的 <strong>等名义、目标总敞口 90%</strong> 版本做了权重研究。在相同的 1,148 个时点，Maker 模拟净收益为 <strong>+7.22 bp/12h</strong>、HAC t <strong>+2.77</strong>，估计实现的市场 Beta 为 <strong>−0.145</strong>。下跌期平均 <strong>+39.32 bp</strong>，上涨期 <strong>−22.83 bp</strong>；加法口径最大回撤 <strong>−15.51%</strong>。这表明名义多空平衡后仍有明显负 Beta，并非严格因子中性。后续 Beta 中性权重实验降低了 Beta，却也降低了平均模拟收益，故没有替换当前实盘等名义权重。</p>
+<h3>为什么严格 Beta 中性在这段样本中没有胜出</h3>
+<p>这里的“严格中性”指<strong>以过去 180 根 4 小时收益估算个币相对冻结 60 币等权指数的 Beta，再调整两侧权重，使估计组合 Beta 为零</strong>。模型、选币、6 多/6 空、持仓缓冲和交易时点均不变。这与“多空美元名义各 45%”是两种不同约束：当前组合美元净敞口约为零，但空头平均估计 Beta <strong>1.14</strong>，多头仅 <strong>0.83</strong>；在 <strong>95.3%</strong> 的时点，空头 Beta 高于多头。要消除组合的负 Beta，就需要减少空头名义、增加多头名义。</p>
+<table>
+<thead>
+<tr>
+  <th>相同 1,148 个时点，Maker 模拟</th>
+  <th style="text-align:right">当前等名义 90%</th>
+  <th style="text-align:right">Beta 中性、总敞口 90%</th>
+  <th style="text-align:right">Beta 中性、单币目标 7.5%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>平均多头 / 空头名义</td>
+  <td style="text-align:right">45.0% / 45.0%</td>
+  <td style="text-align:right">52.1% / 37.9%</td>
+  <td style="text-align:right">44.9% / 33.1%</td>
+</tr>
+<tr>
+  <td>净收益 / 12h</td>
+  <td style="text-align:right">+7.22 bp</td>
+  <td style="text-align:right">+4.67 bp</td>
+  <td style="text-align:right">+3.96 bp</td>
+</tr>
+<tr>
+  <td>实现市场 Beta</td>
+  <td style="text-align:right">−0.145</td>
+  <td style="text-align:right">−0.002</td>
+  <td style="text-align:right">−0.003</td>
+</tr>
+<tr>
+  <td>下跌 / 上涨时点净收益</td>
+  <td style="text-align:right">+39.32 / −22.83 bp</td>
+  <td style="text-align:right">+6.03 / +3.40 bp</td>
+  <td style="text-align:right">+5.48 / +2.54 bp</td>
+</tr>
+<tr>
+  <td>平均总名义 / 最大单币名义</td>
+  <td style="text-align:right">90.0% / 7.5%</td>
+  <td style="text-align:right">90.0% / 10.8%</td>
+  <td style="text-align:right">78.0% / 7.5%</td>
+</tr>
+<tr>
+  <td>加法口径最大回撤</td>
+  <td style="text-align:right">−15.51%</td>
+  <td style="text-align:right">−22.30%</td>
+  <td style="text-align:right">−20.11%</td>
+</tr>
+</tbody>
+</table>
+<p>从相同持仓的未来收益拆分，当前等名义组合平均每 12 小时的<strong>多腿贡献 −0.56 bp、空腿 +8.71 bp</strong>；固定总敞口的 Beta 中性版本改为 <strong>−0.93 bp 和 +6.61 bp</strong>。重新加权使毛收益减少 <strong>2.47 bp</strong>，额外换手成本约 <strong>0.08 bp</strong>，合计净收益差 <strong>2.55 bp</strong>。样本的 60 币等权市场同期平均每 12 小时 <strong>−8.25 bp</strong>，所以原组合的负 Beta 在这段下跌占优的历史中确实有利；严格中性改善了上涨时点，却同时拿掉了大部分下跌保护。对未来市场收益做线性回归时，两者截距分别为 <strong>+6.02</strong> 和 <strong>+4.66 bp/12h</strong>：按这一描述性分解，净收益差约 <strong>1.18 bp</strong> 对应历史市场方向，另 <strong>1.37 bp</strong> 对应重新加权后较低的回归截距。截距不是已证明可持续的纯 Alpha，因而不能把全部差异归因于市场方向或选币能力。</p>
+<p>这个结论有三项限制。第一，两种策略的<strong>配对净收益差</strong>为 +2.55 bp/12h，但 HAC(1) t 约 <strong>1.81</strong>，95% 区间约 <strong>−0.21 至 +5.30 bp</strong>；现有样本不足以确认当前权重今后一定更赚钱。第二，固定 90% 的 Beta 中性组合单币可达 <strong>10.8%</strong>，超过当前 7.5% 目标；保持单币目标的版本平均只能部署 78.0% 总名义，直接比较收益还混入了现金比例差异。第三，Beta 是滚动估计值，零估计 Beta 不保证实时 Beta 或行业、动量等风格暴露为零。30、90、180、540 根回看窗口的 Beta 中性结果均低于当前样本均值，但使用的是<strong>同一段历史</strong>，不是四份独立验证。真实资金费、Maker 成交和最小合约张数仍需另行检验。</p>
+<h3>非熊市行情只做空末 6 名</h3>
+<p>沿用双分类样本外分数、UTC 00/12 时钟及末 18 名持仓缓冲，从完整历史连续模拟<strong>只做空排名最低的 6 个币</strong>，每币 7.5%、总名义 45%。用信号时已知的过去 90 天冻结 60 币等权走势非负来标记非熊市，取其中最长的连续区间 <strong>2025-06-27 12:00 至 2025-08-08 00:00 UTC</strong>，共 <strong>84</strong> 个时点。该区间 60 币等权市场代理的未来 12 小时收益加总 <strong>+26.03%</strong>；只做空组合的模拟 Maker 净收益加总 <strong>−16.20%</strong>，平均 <strong>−19.28 bp/12h</strong>。同期当前 6 多 6 空、90% 总名义的模拟收益加总为 <strong>−6.50%</strong>，两者名义规模不同，不能只凭加总百分比作等风险比较。</p>
+<p>这 6 个空头目标在区间内平均每 12 小时<strong>上涨 41.95 bp</strong>，反而高于市场代理的 <strong>30.99 bp</strong>。所以在这段上涨行情，分类器末 6 名不仅没有提供绝对做空收益，相对机械做空 60 币等权市场代理也落后约 <strong>5.34 bp/12h</strong>（同按 45% 名义，代理未计可交易成本）。较近的 <strong>2026-09-02 至 09-25</strong> 上涨窗口里，市场代理加总 <strong>+26.18%</strong>，只做空 <strong>−7.85%</strong>，当前多空组合 <strong>+6.79%</strong>。检查所有事后上涨的完整日历月，共 356 个时点，只做空收益加总 <strong>−27.99%</strong>；但这些区间切片都只是研究描述，不能当作预先可执行的择时信号。主区间只做空均值的 HAC(1) 95% 区间为 <strong>−52.45 至 +13.88 bp/12h</strong>，样本不足以断言未来非熊市必亏。这里用的是<strong>各折只以过去数据训练的 OOF 模型分数</strong>，不是把今天冻结的模型倒放到历史；没有计入逐币资金费、Maker 未成交及币池幸存者偏差。详细口径和逐期数据见 <code>reports/week33_short_only_nonbear.md</code>、<code>results/week33_short_only_nonbear_periods.csv.gz</code>。</p>
+<p>以上收益属于固定币池、历史 K 线和简化成本下的回测。未完整计入逐币资金费、盘口深度、排队成交、未成交重试、真实滑点和退市/新币影响；回测的“每 12 小时”结果不应直接年化为可信的未来账户收益。</p>
+<figure class="research-figure"><img src="afml-study/results/week33_strategy_oof_comparison.png" alt="四折样本外基线回归与双分类市场中性模拟累计收益比较"><figcaption>研究版 100% 总名义组合；加法口径模拟 Maker 净收益。这不是实盘账户权益，未计真实未成交和逐币资金费。</figcaption></figure><figure class="research-figure"><img src="afml-study/results/week33_neutrality_comparison.png" alt="等名义与 Beta 中性权重在市场上涨和下跌时点的模拟收益比较"><figcaption>同一组 1,148 个样本外时点；市场涨跌按冻结 60 币等权未来收益划分。仅改变权重，Maker 成本为每边 2 bp。</figcaption></figure><figure class="research-figure"><img src="afml-study/results/week33_short_only_nonbear.png" alt="非熊市样本段中市场代理上涨、只做空末六名亏损的模拟路径"><figcaption>2025-06-27 至 2025-08-08 UTC；12 小时收益加总，非实盘权益。只做空总名义 45%，当前多空组合总名义 90%。</figcaption></figure></section><section id="section-4"><h2>4. 当前实盘如何选仓与下单</h2>
+<ol>
+<li>UTC <strong>04:10 / 16:10</strong> 对应读取 UTC <strong>00:00 / 12:00</strong> 的已完成信号柱（北京时间分别为 12:10 / 次日 00:10）。UTC <strong>04:40 / 16:40</strong> 有幂等补跑，用于未完成的调仓。</li>
+<li>对可交易币按 <code>score</code> 排序，选上端 6 个多头、下端 6 个空头。原持仓仍在同侧前 18 名时优先保留，减少换手；候选必须通过交易所最小张数检查。</li>
+<li>正常目标是每个持仓约占权益 <strong>7.5% 名义额</strong>，12 个合计 <strong>90%</strong>。总名义仓位上限为权益的 <strong>100%</strong>，杠杆 <strong>1 倍</strong>。2026-10-03 起不再执行单币硬上限修剪；7.5% 仍是下单目标。无法满足最小合约金额的币跳过，留下现金或尝试后续候选，不把额度强行分给其他币。</li>
+<li>开仓及普通平仓只用 <strong>post-only Maker</strong>，没有 Taker 回退。多空接近平衡时可成对并行提交；失衡时优先补较轻的一侧。订单用 <code>clOrdId</code> 记录和恢复，必须确认上一单终态后才重试剩余张数。</li>
+<li>每 5 分钟左右检查交易所持仓、账户权益与价格，并核对总名义仓位上限。2026-10-03 起，原单仓 <strong>5%</strong> 止损和账户浮亏 <strong>0.5%</strong> 止损均已关闭；只有总名义仓位超限才可能触发计划外减仓。调仓与风险检查共用锁；长时间调仓期间，定时风险检查可能被延后，这也是运行监控必须显示状态过期的原因。</li>
+</ol>
+<p>“目标 6 多 / 6 空”不等于每一刻都已成交到 12 个仓位。只有两侧各 6 个<strong>真实确认持仓</strong>时，调仓才标记完成；未成交、最小张数限制或风险退出都可能使组合暂时偏离目标。Live 页应同时显示目标结构与真实持仓。</p>
+</section><section id="section-5"><h2>5. 部署过程与实盘证据边界</h2>
+<ul>
+<li><strong>2026-09-28</strong>：Week33 上线。迁移时保留了旧 Week22 策略的 3 个多仓，因此部署初期的账户变化无法全部归因于新模型。</li>
+<li><strong>2026-09-29</strong>：一次调仓因串行 Maker 重试触及旧超时，曾留下 <strong>5 多 / 1 空</strong>。随后修复为按真实成交持仓维持缓冲、优先补较轻侧、延长内部预算并增加幂等补跑。</li>
+<li><strong>2026-09-30</strong>：加入成对并行委托与逐单恢复日志。当日模型分数、仓位目标和止损参数没有因此改变。</li>
+<li><strong>2026-10-03</strong>：主账户与 ListFold 子账户同时移除单币硬上限修剪、单仓止损和账户浮亏止损；保留各自总名义上限、每币目标与定时风险核对。详见 <code>reports/live_risk_policy_change_20261003.md</code>。</li>
+</ul>
+<p>截至整理日，新版本实盘历史只有数天，包含继承仓位、未平仓浮盈和执行规则变化。账户权益短期上升只能说明这段实际路径盈利，<strong>不足以估计长期胜率、最大回撤或可靠年化</strong>。Live 页的资金曲线由服务器留存的少数历史快照加本地持续采样构成；早期缺口不能用直线连线当作真实逐时权益路径。</p>
+</section><section id="section-6"><h2>6. 下一轮研究应回答的问题</h2>
+<ol>
+<li>在<strong>未参与当前模型和规则选择</strong>的后续数据中，分开记录多头、空头、净收益、市场 Beta 与风格暴露。</li>
+<li>对每个目标订单记录 Maker 挂单、部分成交、撤单、补跑和放弃，计算真实成交率与未成交选择偏差。</li>
+<li>用交易所账单核对手续费、资金费、已实现盈亏和账户权益变化；剔除入金出金与旧仓迁移影响。</li>
+<li>保存连续权益快照，计算可核实的回撤与恢复时间；对调仓占锁期间的风控延迟单独计时。</li>
+<li>比较等名义与 Beta/风格约束权重时，要保留相同的总敞口约束、真实最小合约张数和执行规则。</li>
+</ol>
+</section><section id="section-7"><h2>7. 复现资料</h2>
+<ul>
+<li>冻结模型与配置：<code>results/week22_4h_live_model/metadata.json</code>、<code>top_model.txt</code>、<code>bottom_model.txt</code>。</li>
+<li>样本外信号比较：<code>results/week32_signal_optimization.json</code>、<code>results/week32_signal_optimization_periods.csv.gz</code>、<code>reports/week32_signal_optimization.md</code>。</li>
+<li>权重实验：<code>results/week33_beta_neutral_weights.json</code>、<code>reports/week33_beta_neutral_weights.md</code>。</li>
+<li>非熊市只做空检验：<code>results/week33_short_only_nonbear.json</code>、<code>reports/week33_short_only_nonbear.md</code>、<code>scripts/week33_short_only_nonbear_test.py</code>。</li>
+<li>训练与执行：<code>scripts/week22_train_4h_live.py</code>、<code>scripts/week22_okx_4h_live.py</code>、<code>scripts/week22_order_journal.py</code>。</li>
+<li>部署与修复：<code>reports/week33_live_deployment.md</code>。后续诊断：<code>reports/week34_residual_ic_audit.md</code>；它是研究，不是当前实盘版本。</li>
+</ul>
+<p>下方 Notebook 的代码单元只读取这些现有结果并重画图表，不重新训练模型，也不触发交易。</p>
+</section><section id="listfold"><h1>子账户策略说明：Week47 ListFold 神经网络</h1>
+<blockquote>
+<p>更新日期：2026-10-05。独立 OKX 子账户现行版本为 <code>WEEK47_OKX_LISTFOLD_DOLLARBAR_NEUTRAL_V1</code>。下方 Week42 的历史研究和模型训练细节保留供对照；实时权益、持仓和风险配置以实盘监控的状态快照为准。</p>
+</blockquote>
+<h2>模型与组合</h2>
+<p>Week47 沿用 ListFold 排序与 6 多、6 空的组合框架，在原有 26 个 4 小时因果特征之外加入 4 个由已完成的 1 小时行情近似构建的成交额柱特征。模型从 2025-11-01 开始训练，已知训练标签截至 2026-10-01 12:00 UTC。2026 年 4–9 月的配对历史检验中，新输入相对同窗 4 小时基线增量为 +2.99 bp/12h，HAC t=1.18；证据不足以认定稳定改善。<a href="afml-study/reports/week46_hourly_dollarbar_ab.md">配对研究</a>说明了口径和限制。</p>
+<h3>上一版 Week42 的训练细节</h3>
+<p>Week42 使用冻结的 60 个 OKX USDT 永续合约及 26 个 4 小时因果特征。ListFold-exp 神经网络以横截面多空排序为目标；训练时按时间留出验证段，用验证损失选择更新轮次，再用完整可用训练段重新拟合。两个随机种子分别选择 125 和 225 次更新，预测取平均。冻结训练标签截至 2026-10-01 12:00 UTC。它与主账户的双 LightGBM 分类器是两套不同信号。</p>
+<p>每个 UTC 00:00 / 12:00 决策柱完成后，按模型分数选 6 多、6 空；真实确认的同侧持仓仍在前 18 名时优先保留。常规调仓在 UTC 04:25 / 16:25 运行，04:55 / 16:55 有补跑。未成交或最小合约张数限制可能使实时持仓偏离目标。开平仓采用 post-only Maker，没有 Taker 回退。</p>
+<h2>当前仓位与风险规则</h2>
+<p>子账户每币目标名义额为权益的 <strong>37.5%</strong>，12 个仓位的目标总名义额为权益的 <strong>4.5 倍</strong>，逐合约隔离杠杆 <strong>5 倍</strong>。4.5 倍也是总名义仓位上限。2026-10-03 起，单币硬上限修剪、单仓止损和账户浮亏止损均已关闭；定时检查仍核对交易所持仓、权益和价格，只有总名义仓位超限才可能触发计划外减仓。历史止损事件仍保留在监控页，不代表当前仍启用相应阈值。</p>
+<p>主账户与子账户使用不同凭证、运行目录和互斥锁。两条权益曲线各自以本账户 USDT 计量，不能把子账户 4.5 倍名义仓位当成主账户的 90% 目标。两套策略的“市场中性”都是多空名义目标大致相等，不保证实际持仓或市场 Beta 始终中性。</p>
+<h2>研究证据与资料</h2>
+<p>上一版 Week42 的四折历史模拟中，时间提前停止并重训的 ListFold 版本在预设 Maker 成本下平均净收益为 <strong>+10.97 bp/12h</strong>，相对固定轮次版本增量为 <strong>+3.71 bp/12h</strong>；但去掉最佳 5% 时点后为 <strong>−2.87 bp/12h</strong>。新增日历检验仅有 6 个决策点，结果对单个时段敏感。历史研究已反复用于模型选择，且没有完整计入资金费、滑点和真实 Maker 未成交；这些数值不能作为 Week47 实盘收益预测。</p>
+<p>训练与样本外结果见 <code>reports/week40_listfold_time_early_stop.md</code>、<code>reports/week41_new_calendar_holdout.md</code>；部署核对见 <code>reports/week42_listfold_subaccount_audit.md</code>；现行风控变更见 <code>reports/live_risk_policy_change_20261003.md</code>。冻结模型配置见 <code>results/week42_listfold_live_model/metadata.json</code>。</p>
+</section></article><aside class="toc" aria-label="在此页"><h2>☷ 在此页</h2><a href="#week33">主账户 · Week33</a><a href="#section-1">1. 核心问题与策略思路</a><a href="#section-2">2. 数据、训练与防前视</a><a href="#section-3">3. 样本外研究给出了什么证据</a><a href="#section-4">4. 当前实盘如何选仓与下单</a><a href="#section-5">5. 部署过程与实盘证据边界</a><a href="#section-6">6. 下一轮研究应回答的问题</a><a href="#section-7">7. 复现资料</a><a href="#listfold">子账户 · ListFold</a></aside></main></body></html>

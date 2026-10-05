@@ -1,0 +1,61 @@
+name: Publish strategy site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '3/5 * * * *'
+
+concurrency:
+  group: strategy-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and sanitize fresh monitoring data
+        env:
+          SNAPSHOT_SSH_KEY: ${{ secrets.SNAPSHOT_SSH_KEY }}
+          SNAPSHOT_SSH_DESTINATION: ${{ secrets.SNAPSHOT_SSH_DESTINATION }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ -z "$SNAPSHOT_SSH_KEY" ] || [ -z "$SNAPSHOT_SSH_DESTINATION" ]; then
+            if [ "$EVENT_NAME" = schedule ]; then
+              echo 'Snapshot SSH secrets are required for scheduled refreshes.' >&2
+              exit 1
+            fi
+            echo 'Publishing the checked-in snapshot; live refresh is not configured yet.'
+            exit 0
+          fi
+          install -d -m 700 "$HOME/.ssh" raw
+          printf '%s\n' "$SNAPSHOT_SSH_KEY" > "$HOME/.ssh/strategy_snapshot"
+          chmod 600 "$HOME/.ssh/strategy_snapshot"
+          cat > "$HOME/.ssh/known_hosts" <<'HOST_KEY'
+          snapshot-source ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPWSsUlY3PrpCKHb94FipcxZ4PAHsXRI7iSf1OqzXE0T
+          HOST_KEY
+          ssh -i "$HOME/.ssh/strategy_snapshot" -o HostKeyAlias=snapshot-source -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -T -p 24282 "$SNAPSHOT_SSH_DESTINATION" > "$RUNNER_TEMP/strategy-snapshots.tar.gz"
+          tar -xzf "$RUNNER_TEMP/strategy-snapshots.tar.gz" -C raw
+          python3 build_public_site.py --skip-static --data-dir raw
+          python3 refresh_candles.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
