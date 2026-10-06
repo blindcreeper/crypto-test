@@ -38,7 +38,16 @@ jobs:
           cat > "$HOME/.ssh/known_hosts" <<'HOST_KEY'
           snapshot-source ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPWSsUlY3PrpCKHb94FipcxZ4PAHsXRI7iSf1OqzXE0T
           HOST_KEY
-          ssh -i "$HOME/.ssh/strategy_snapshot" -o HostKeyAlias=snapshot-source -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -T -p 24282 "$SNAPSHOT_SSH_DESTINATION" > "$RUNNER_TEMP/strategy-snapshots.tar.gz"
+          for attempt in 1 2 3; do
+            if ssh -i "$HOME/.ssh/strategy_snapshot" -o HostKeyAlias=snapshot-source -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -T -p 24282 "$SNAPSHOT_SSH_DESTINATION" > "$RUNNER_TEMP/strategy-snapshots.tar.gz"; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo 'Snapshot SSH fetch failed after three attempts.' >&2
+              exit 1
+            fi
+            sleep 10
+          done
           tar -xzf "$RUNNER_TEMP/strategy-snapshots.tar.gz" -C raw
           python3 build_public_site.py --skip-static --data-dir raw
           python3 refresh_candles.py
