@@ -124,7 +124,8 @@ def copy_static() -> None:
         html = html.replace("age<12", "age<25").replace("age>=12", "age>=25")
         html = html.replace("超过 12 分钟", "超过 25 分钟")
         html = html.replace("请检查本地同步和服务器定时器。", "请检查数据发布任务和服务器定时器。")
-        html = html.replace("setInterval(load,30000)", "setInterval(load,60000)")
+        html = html.replace("setInterval(()=>{if(!$('refresh').disabled)load()},30000)",
+                            "setInterval(()=>{if(!$('refresh').disabled)load()},60000)")
         page.write_text(html, encoding="utf-8")
 
 
