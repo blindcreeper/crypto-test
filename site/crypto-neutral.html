@@ -125,17 +125,16 @@ function nearestSnapshot(rows,ms){
 }
 function clearChartHover(){for(const model of Object.values(chartModels)){model.line.style.display='none';model.dot.style.display='none';model.tooltip.hidden=true}}
 function showChartHover(ms,activeId,clientX){
- for(const [id,model] of Object.entries(chartModels)){
-  const x=model.p+(ms-model.t0)/Math.max(model.t1-model.t0,1)*(model.w-2*model.p);
-  model.line.setAttribute('x1',x);model.line.setAttribute('x2',x);model.line.style.display='';
-  const row=nearestSnapshot(model.rows,ms);
-  if(row){const dotX=model.p+(Date.parse(row.time)-model.t0)/Math.max(model.t1-model.t0,1)*(model.w-2*model.p),dotY=model.h-model.p-(row.equity-model.lo)/(model.hi-model.lo)*(model.h-2*model.p);model.dot.setAttribute('cx',dotX);model.dot.setAttribute('cy',dotY);model.dot.style.display=''}else model.dot.style.display='none';
-  model.tooltip.hidden=id!==activeId;
- }
- const active=chartModels[activeId];if(!active)return;
- const describe=(id,label)=>{const row=chartModels[id]&&nearestSnapshot(chartModels[id].rows,ms);return row?`${label}：${fmt(row.equity,3)} USDT（快照 ${dateBJ(row.time)}）`:`${label}：该时刻无快照`};
- active.tooltip.innerHTML=`<strong>${chartDate(ms)}（北京时间）</strong><span>${describe('equity-chart','主账户')}</span><span>${describe('sub-equity-chart','子账户')}</span>`;
- const hostRect=active.host.getBoundingClientRect();active.tooltip.style.left=Math.max(8,Math.min(active.host.clientWidth-active.tooltip.offsetWidth-8,clientX-hostRect.left+12))+'px';
+ clearChartHover();
+ const model=chartModels[activeId];if(!model)return;
+ const x=model.p+(ms-model.t0)/Math.max(model.t1-model.t0,1)*(model.w-2*model.p);
+ model.line.setAttribute('x1',x);model.line.setAttribute('x2',x);model.line.style.display='';
+ const row=nearestSnapshot(model.rows,ms);
+ if(row){const dotX=model.p+(Date.parse(row.time)-model.t0)/Math.max(model.t1-model.t0,1)*(model.w-2*model.p),dotY=model.h-model.p-(row.equity-model.lo)/(model.hi-model.lo)*(model.h-2*model.p);model.dot.setAttribute('cx',dotX);model.dot.setAttribute('cy',dotY);model.dot.style.display=''}
+ const label=activeId==='sub-equity-chart'?'子账户':'主账户';
+ model.tooltip.innerHTML=`<strong>${chartDate(ms)}（北京时间）</strong><span>${row?`${label}权益：${fmt(row.equity,3)} USDT（快照 ${dateBJ(row.time)}）`:`${label}：该时刻无快照`}</span>`;
+ model.tooltip.hidden=false;
+ const hostRect=model.host.getBoundingClientRect();model.tooltip.style.left=Math.max(8,Math.min(model.host.clientWidth-model.tooltip.offsetWidth-8,clientX-hostRect.left+12))+'px';
 }
 function renderChart(rows,hostId,startId,endId,t0,t1){
  const host=$(hostId),sub=hostId==='sub-equity-chart';
