@@ -1,41 +1,35 @@
-# Crypto Test 策略站点
+# Crypto Test · 多币种策略研究
 
-## 在线页面
+这个项目研究一个具体问题：**能否利用已确认的行情信息，判断未来一段时间哪些加密资产相对更强、哪些相对更弱？**研究从单币涨跌预测转向跨币种比较，再据此构建多空组合。预测分数用于排序，不代表确定的收益。
 
-- [VPS 实盘看板](https://dashboard.add1cter.dpdns.org/crypto-neutral.html)：服务器每分钟导出一次经过筛选的账户快照，页面每 15 秒检查更新；行情缓存每 5 分钟刷新。看板只读，公开可访问。
-- [GitHub Pages 镜像](https://blindcreeper.github.io/crypto-test/crypto-neutral.html)：GitHub Actions 尝试定时获取快照并发布；定时任务可能延迟，页面会显示数据时间。
-- [策略介绍](https://blindcreeper.github.io/crypto-test/)：GitHub Pages 上的静态介绍页面。
+## 阅读入口
 
-实盘交易服务独立运行，不依赖这两个网站。看板上的账户权益、持仓和盈亏为公开信息，请勿在 `site/` 中加入交易密钥或完整执行状态。
+- [策略介绍](https://blindcreeper.github.io/crypto-test/)：用直观例子解释预测目标、多空收益、交易流程和主要风险。
+- [技术说明](https://blindcreeper.github.io/crypto-test/strategy-details.html)：数据、特征、样本外检验及两套策略的规则。
+- [账户监控](https://dashboard.add1cter.dpdns.org/crypto-neutral.html)：主账户与子账户的权益、持仓、委托和近期风险事件；页面会标明数据时间。
 
-## 仓库内容
+## 研究内容
 
-- `site/`：公开页面及经过筛选的快照，也是 GitHub Pages 的发布目录。
-- `build_public_site.py`：从本地研究目录或 GitHub Actions 下载的原始快照生成公开文件，仅保留页面需要的字段。
-- `refresh_candles.py`：从 OKX 公共接口刷新行情缓存；支持 `STRATEGY_CANDLES_PROXY`，校验行情时效后原子替换缓存。
-- `server/build_live_site.py`：从 `site/` 生成 VPS 版本的页面，调整数据过期阈值与刷新间隔，去除 GitHub Pages 的手动发布入口。
-- `server/live_dashboard_server.py`：仅监听 `127.0.0.1:8765` 的只读网页服务。
-- `server/publish_live_dashboard.py`：从两个策略的运行目录导出经过筛选的状态及权益历史。
-- `server/strategy-dashboard-*.service` 和 `server/strategy-dashboard-*.timer`：VPS 网页服务、每分钟快照导出和每 5 分钟行情刷新任务的 systemd 配置。
+1. **相对强弱预测。**从历史价格、波动和成交等信息构建特征，比较不同币种未来约 12 小时的表现。
+2. **多空组合。**根据模型排序选择相对较强和较弱的币种，分别建立多头与空头；目标是分散单一币种的影响，而不是保证市场风险完全抵消。
+3. **真实执行检验。**将样本外模拟与账户实际成交分开观察，重点核对手续费、资金费、未成交委托、仓位偏离和策略中断等影响。
 
-公开快照包含余额、持仓、收益、委托次数与手续费、近期风险事件；不包含交易所订单 ID、客户端 ID、待执行委托详情或 API 凭证。服务端导出使用 `build_public_site.py` 中同一套字段筛选函数。图上的子账户异常区间依据已确认的调仓记录标注；期间权益快照继续记录。
+当前公开说明涵盖 Week33 双分类策略与 Week47 ListFold 神经网络策略。两者的特征和仓位规则不同，具体设置以各自的[技术说明](https://blindcreeper.github.io/crypto-test/strategy-details.html)为准。
 
-## 更新 VPS 看板
+## 仓库结构
 
-`server/build_live_site.py` 的目标目录必须尚不存在。它复制 `site/` 后生成动态看板页面；部署目录为 `/opt/strategy-dashboard/site`。VPS 上的 `build_public_site.py`、`refresh_candles.py`、`live_dashboard_server.py` 和 `publish_live_dashboard.py` 分别放在 `/opt/strategy-dashboard/` 下，systemd 配置放在 `/etc/systemd/system/`。
+| 路径 | 内容 |
+| --- | --- |
+| `site/index.html`、`site/strategy-intro.html` | 面向读者的策略介绍 |
+| `site/strategy-details.html` | 方法、样本外结果与实盘证据边界 |
+| `site/crypto-neutral.html` | 公开账户监控页面 |
+| `site/afml-study/` | 研究笔记、报告、图表与公开快照 |
+| `build_public_site.py`、`refresh_candles.py`、`server/` | 公开数据筛选与页面更新辅助代码 |
 
-网页服务通过现有 Cloudflare Tunnel 主机名路由连接到 `http://localhost:8765`。推送 GitHub 仓库只会触发 GitHub Pages 发布；更新 VPS 页面仍需部署生成后的页面。网页服务读取 `site/`，快照导出任务只写入 `site/afml-study/results/_server_live/`。
+本仓库展示研究材料和经过筛选的监控数据，不包含交易密钥、模型权重或完整执行状态。图表中的历史模拟结果与真实账户收益属于不同口径；评估策略时应分别查看，并考虑交易成本和执行落差。
 
-## GitHub Pages 镜像
+## 研究资料
 
-仓库的 `.github/workflows/pages.yml` 在推送时发布 `site/`，并配置了每 5 分钟一次的定时尝试。实际触发时间由 GitHub Actions 决定，不能当作实时监控频率。
-
-定时刷新需要 Actions secrets `SNAPSHOT_SSH_KEY` 和 `SNAPSHOT_SSH_DESTINATION`。服务器上与私钥配对的公钥必须限制为 `server/export_snapshots.py` 固定命令，并禁用转发与 PTY；不要把无限制的 root SSH 密钥放进仓库 secrets。工作流固定服务器 Ed25519 主机密钥，只读取六个快照文件，在临时 runner 中筛选后发布。行情请求失败时，已发布的旧缓存仍可显示。
-
-GitHub Pages 页面会显示源数据时间，并在数据超过 25 分钟时提示过期。GitHub 可能在公开仓库连续 60 天没有活动后禁用定时工作流，届时需要在 Actions 中重新启用。
-
-从本机研究目录重新生成静态内容时，在 `D:\0817` 运行：
-
-```powershell
-python github-pages-strategy/build_public_site.py
-```
+- [Week33 Jupyter 笔记](site/afml-study/notebooks/12_week33_live_strategy_research.ipynb)
+- [Week33 策略研究报告](site/afml-study/reports/week33_strategy_research.md)
+- [ListFold 策略研究报告](site/afml-study/reports/week42_strategy_research.md)
