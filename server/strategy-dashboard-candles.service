@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh public OKX candle cache for strategy dashboard
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=STRATEGY_CANDLES_PROXY=http://127.0.0.1:8118
+ExecStart=/usr/bin/python3 /opt/strategy-dashboard/refresh_candles.py
+TimeoutStartSec=90
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/strategy-dashboard/site/afml-study/results/_server_live

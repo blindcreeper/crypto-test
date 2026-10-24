@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 import time
 import urllib.parse
 import urllib.request
@@ -14,6 +16,7 @@ DATA = Path(__file__).resolve().parent / "site/afml-study/results/_server_live"
 STATE = DATA / "week33_state.json"
 OUT = DATA / "week33_candles.json"
 CORE = {f"{asset}-USDT-SWAP" for asset in ("BTC", "ETH", "SOL", "BNB", "DOGE", "XRP")}
+PROXY = os.environ.get("STRATEGY_CANDLES_PROXY", "")
 
 
 def fetch(symbol: str) -> list[dict]:
@@ -22,7 +25,10 @@ def fetch(symbol: str) -> list[dict]:
         f"https://www.okx.com/api/v5/market/candles?{query}",
         headers={"User-Agent": "strategy-pages/1.0"},
     )
-    with urllib.request.urlopen(request, timeout=12) as response:
+    opener = urllib.request.build_opener(
+        urllib.request.ProxyHandler({"http": PROXY, "https": PROXY})
+    ) if PROXY else urllib.request.build_opener()
+    with opener.open(request, timeout=12) as response:
         body = json.load(response)
     if body.get("code") != "0":
         raise ValueError(f"{symbol}: OKX code {body.get('code')}")
@@ -41,7 +47,10 @@ def fetch(symbol: str) -> list[dict]:
     ]
     if len(candles) < 10:
         raise ValueError(f"{symbol}: fewer than 10 candles")
-    return sorted(candles, key=lambda row: row["time"])
+    candles = sorted(candles, key=lambda row: row["time"])
+    if time.time() - candles[-1]["time"] > 8 * 3600:
+        raise ValueError(f"{symbol}: latest candle is stale")
+    return candles
 
 
 def main() -> None:
@@ -51,17 +60,31 @@ def main() -> None:
     previous = old.get("symbols") or {}
     current = {symbol: previous[symbol] for symbol in symbols if symbol in previous}
     now = time.time()
+    refreshed = 0
     with ThreadPoolExecutor(max_workers=4) as pool:
         jobs = {pool.submit(fetch, symbol): symbol for symbol in symbols}
         for job in as_completed(jobs):
             symbol = jobs[job]
             try:
                 current[symbol] = {"fetched_at": now, "candles": job.result()}
+                refreshed += 1
             except Exception as exc:
                 print(f"Candle refresh skipped for {symbol}: {exc}")
+    if not refreshed:
+        raise RuntimeError("No OKX candles refreshed; keeping the previous cache")
     payload = {"schema_version": 2, "generated_at": now, "bar": "4H", "symbols": current}
-    OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"Candles available for {len(current)}/{len(symbols)} symbols")
+    fd, temp = tempfile.mkstemp(prefix=".week33_candles.", dir=DATA)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temp, 0o644)
+        os.replace(temp, OUT)
+    finally:
+        if os.path.exists(temp):
+            os.unlink(temp)
+    print(f"Candles refreshed for {refreshed}/{len(symbols)} symbols")
 
 
 if __name__ == "__main__":

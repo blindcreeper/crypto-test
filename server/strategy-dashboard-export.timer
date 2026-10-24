@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh sanitized strategy dashboard snapshots every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:05 UTC
+Persistent=true
+AccuracySec=1s
+Unit=strategy-dashboard-export.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,20 @@
+[Unit]
+Description=Read-only strategy dashboard on localhost
+After=network-online.target
+
+[Service]
+Type=simple
+User=strategy-dashboard
+Group=strategy-dashboard
+WorkingDirectory=/opt/strategy-dashboard
+ExecStart=/usr/bin/python3 /opt/strategy-dashboard/live_dashboard_server.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

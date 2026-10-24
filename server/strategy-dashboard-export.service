@@ -1,0 +1,10 @@
+[Unit]
+Description=Export sanitized strategy dashboard snapshots
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/strategy-dashboard/publish_live_dashboard.py
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/strategy-dashboard/site/afml-study/results/_server_live
